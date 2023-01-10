@@ -90,7 +90,7 @@
                                 <entityComboBox id="projectSelector" caption="msg://projectSelector.caption"
                                                 optionsContainer="projectsDc"/>
                                 <textField id="nameSelector" caption="msg://nameSelector.caption" datatype="string"/>
-                                <dateField id="dateSelector" caption="msg://dataSelector.caption" datatype="localDate"/>
+                                <dateField id="dateSelector" caption="msg://dataSelector.caption" datatype="localDateTime"/>
                                 <hbox spacing="true" width="AUTO">
                                     <button id="addTaskBtn" action="addTaskAction"/>
                                     <button id="refreshBtn" action="refreshAction"/>

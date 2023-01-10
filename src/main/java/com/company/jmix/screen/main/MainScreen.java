@@ -4,6 +4,7 @@ import com.company.jmix.app.TaskService;
 import com.company.jmix.entity.Project;
 import com.company.jmix.entity.ProjectTask;
 import io.jmix.ui.Notifications;
+import io.jmix.ui.ScreenBuilders;
 import io.jmix.ui.ScreenTools;
 import io.jmix.ui.action.Action;
 import io.jmix.ui.component.*;
@@ -13,11 +14,7 @@ import io.jmix.ui.model.CollectionContainer;
 import io.jmix.ui.model.CollectionLoader;
 import io.jmix.ui.model.InstanceLoader;
 import io.jmix.ui.navigation.Route;
-import io.jmix.ui.screen.Screen;
-import io.jmix.ui.screen.Subscribe;
-import io.jmix.ui.screen.UiController;
-import io.jmix.ui.screen.UiControllerUtils;
-import io.jmix.ui.screen.UiDescriptor;
+import io.jmix.ui.screen.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
@@ -46,7 +43,7 @@ public class MainScreen extends Screen implements Window.HasWorkArea {
     private CollectionContainer<Project> projectsDc;
 
     @Autowired
-    private DateField<LocalDate> dateSelector;
+    private DateField<LocalDateTime> dateSelector;
     @Autowired
     private TextField<String> nameSelector;
     @Autowired
@@ -56,6 +53,8 @@ public class MainScreen extends Screen implements Window.HasWorkArea {
     private Notifications notifications;
     @Autowired
     private TaskService taskService;
+    @Autowired
+    private ScreenBuilders screenBuilders;
 
 
     @Override
@@ -95,7 +94,7 @@ public class MainScreen extends Screen implements Window.HasWorkArea {
             projectSelector.focus();
             return;
         }
-        ProjectTask newTask = taskService.creatNewTask(projectSelector.getValue(), nameSelector.getValue(), LocalDateTime.from(dateSelector.getValue()));
+        ProjectTask newTask = taskService.creatNewTask(projectSelector.getValue(), nameSelector.getValue(), dateSelector.getValue());
         // второй вариант
         //  projectsDc.replaceItem(newTask.getProject());
         // первый вариант
@@ -104,5 +103,24 @@ public class MainScreen extends Screen implements Window.HasWorkArea {
         projectSelector.setValue(null);
         nameSelector.setValue(null);
         dateSelector.setValue(null);
+    }
+
+    @Subscribe("tasksCalendar")
+    public void onTasksCalendarCalendarEventClick(Calendar.CalendarEventClickEvent<LocalDateTime> event) {
+
+        ProjectTask projectTask = (ProjectTask) event.getEntity();
+
+        Screen screen = screenBuilders.editor(ProjectTask.class, this)
+                .editEntity(projectTask)
+                .withOpenMode(OpenMode.DIALOG)
+                .build();
+
+
+        screen.addAfterCloseListener(afterCloseEvent -> {
+            if (afterCloseEvent.closedWith(StandardOutcome.COMMIT)) {
+                projectsDl.load();
+            }
+        });
+        screen.show();
     }
 }
